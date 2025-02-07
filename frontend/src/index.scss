@@ -4,15 +4,9 @@ body {
   margin: 50px !important;
 }
 
-form {
-  display: flex;
-  gap: 20px;
+main {
+  align-items: center !important;
+  display: flex !important;
   flex-direction: column;
-  width: 400px;
-
-  input {
-    border: 1px solid rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
-    font-family: "Roboto", serif;
-  }
+  //   justify-content: center !important;
 }

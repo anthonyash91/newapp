@@ -6,7 +6,9 @@ import {
   RadioGroup,
   Button,
   Flex,
+  Box,
   useToast,
+  Spacer,
   IconButton
 } from "@chakra-ui/react";
 import { FaTrash } from "react-icons/fa6";
@@ -166,152 +168,168 @@ export default function App() {
     }
   };
 
-  const [input, setInput] = useState("");
-  const isError = input === "";
-
   useEffect(() => {
     getCourses();
     getCategories();
   }, []);
 
   return (
-    <Flex flexDirection="column" gap="50" alignItems="flex-start">
-      <Flex gap="50">
-        <form onSubmit={createCourse}>
-          <Input
-            placeholder="English Title"
-            name="englishTitle"
-            value={newCourse.englishTitle}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, englishTitle: e.target.value });
-            }}
-          />
-          <Input
-            placeholder="English Link"
-            name="englishLink"
-            value={newCourse.englishLink}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, englishLink: e.target.value });
-            }}
-          />
-          <Input
-            placeholder="Spanish Title"
-            name="spanishTitle"
-            value={newCourse.spanishTitle}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, spanishTitle: e.target.value });
-            }}
-          />
-          <Input
-            placeholder="Spanish Link"
-            name="spanishLink"
-            value={newCourse.spanishLink}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, spanishLink: e.target.value });
-            }}
-          />
-          <Select
-            placeholder="Choose a category"
-            name="category"
-            value={newCourse.category}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, category: e.target.value });
-            }}
-          >
-            {allCategories?.data?.map((i) => (
-              <option key={i._id}>{i.englishTitle}</option>
-            ))}
-          </Select>
-          <Select
-            placeholder="Choose content type"
-            name="contentType"
-            value={newCourse.contentType}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, contentType: e.target.value });
-            }}
-          >
-            <option>Video</option>
-            <option>PDF</option>
-          </Select>
-          <RadioGroup onChange={setCourseStatus} value={courseStatus}>
-            <Flex gap="10">
-              <Radio
-                name="active"
-                value="true"
-                onChange={(e) =>
-                  setNewCourse({ ...newCourse, active: e.target.value })
-                }
+    <main>
+      <Flex flexDirection="row" gap="50" w="90%">
+        <Box flexBasis="100%">
+          <form onSubmit={createCourse}>
+            <Flex flexDirection="column" gap="5">
+              <Input
+                placeholder="English Title"
+                name="englishTitle"
+                value={newCourse.englishTitle}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, englishTitle: e.target.value });
+                }}
+              />
+              <Input
+                placeholder="English Link"
+                name="englishLink"
+                value={newCourse.englishLink}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, englishLink: e.target.value });
+                }}
+              />
+              <Input
+                placeholder="Spanish Title"
+                name="spanishTitle"
+                value={newCourse.spanishTitle}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, spanishTitle: e.target.value });
+                }}
+              />
+              <Input
+                placeholder="Spanish Link"
+                name="spanishLink"
+                value={newCourse.spanishLink}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, spanishLink: e.target.value });
+                }}
+              />
+              <Select
+                placeholder="Choose a category"
+                name="category"
+                value={newCourse.category}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, category: e.target.value });
+                }}
               >
-                Active
-              </Radio>
+                {allCategories?.data?.map((i) => (
+                  <option key={i._id}>{i.englishTitle}</option>
+                ))}
+              </Select>
+              <Select
+                placeholder="Choose content type"
+                name="contentType"
+                value={newCourse.contentType}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, contentType: e.target.value });
+                }}
+              >
+                <option>Video</option>
+                <option>PDF</option>
+              </Select>
+              <RadioGroup onChange={setCourseStatus} value={courseStatus}>
+                <Flex gap="10">
+                  <Radio
+                    name="active"
+                    value="true"
+                    onChange={(e) =>
+                      setNewCourse({ ...newCourse, active: e.target.value })
+                    }
+                  >
+                    Active
+                  </Radio>
 
-              <Radio
-                name="active"
-                onChange={(e) =>
-                  setNewCourse({ ...newCourse, active: e.target.value })
-                }
-                value="false"
-              >
-                Inactive
-              </Radio>
+                  <Radio
+                    name="active"
+                    onChange={(e) =>
+                      setNewCourse({ ...newCourse, active: e.target.value })
+                    }
+                    value="false"
+                  >
+                    Inactive
+                  </Radio>
+                </Flex>
+              </RadioGroup>
+
+              {newCourse.englishTitle &&
+              newCourse.englishLink &&
+              newCourse.category &&
+              newCourse.contentType &&
+              newCourse.active ? (
+                <Button colorScheme="blue" type="submit">
+                  Create Course
+                </Button>
+              ) : (
+                <Button colorScheme="blue" type="submit" disabled>
+                  Create Course
+                </Button>
+              )}
             </Flex>
-          </RadioGroup>
+          </form>
+        </Box>
+        <Box flexBasis="100%">
+          <Spacer />
+          <form onSubmit={createCategory}>
+            <Flex flexDirection="column" gap="5" w="100%">
+              <Input
+                placeholder="English Title"
+                name="englishTitle"
+                value={newCategory.englishTitle}
+                onChange={(e) => {
+                  setNewCategory({
+                    ...newCategory,
+                    englishTitle: e.target.value
+                  });
+                }}
+              />
 
-          {newCourse.englishTitle &&
-          newCourse.englishLink &&
-          newCourse.category &&
-          newCourse.contentType &&
-          newCourse.active ? (
-            <Button colorScheme="blue" type="submit">
-              Create Course
-            </Button>
-          ) : (
-            <Button colorScheme="blue" type="submit" disabled>
-              Create Course
-            </Button>
-          )}
-        </form>
+              <Input
+                placeholder="Spanish Title"
+                name="spanishTitle"
+                value={newCategory.spanishTitle}
+                onChange={(e) => {
+                  setNewCategory({
+                    ...newCategory,
+                    spanishTitle: e.target.value
+                  });
+                }}
+              />
+              <Input
+                placeholder="Category Image"
+                name="categoryImage"
+                value={newCategory.categoryImage}
+                onChange={(e) => {
+                  setNewCategory({
+                    ...newCategory,
+                    categoryImage: e.target.value
+                  });
+                }}
+              />
 
-        <form onSubmit={createCategory}>
-          <Input
-            placeholder="English Title"
-            name="englishTitle"
-            value={newCategory.englishTitle}
-            onChange={(e) => {
-              setNewCategory({ ...newCategory, englishTitle: e.target.value });
-            }}
-          />
-
-          <Input
-            placeholder="Spanish Title"
-            name="spanishTitle"
-            value={newCategory.spanishTitle}
-            onChange={(e) => {
-              setNewCategory({ ...newCategory, spanishTitle: e.target.value });
-            }}
-          />
-          <Input
-            placeholder="Category Image"
-            name="categoryImage"
-            value={newCategory.categoryImage}
-            onChange={(e) => {
-              setNewCategory({ ...newCategory, categoryImage: e.target.value });
-            }}
-          />
-
-          {newCourse.englishTitle &&
-          newCourse.englishLink &&
-          newCourse.categoryImage ? (
-            <Button colorScheme="blue" type="submit">
-              Create Category
-            </Button>
-          ) : (
-            <Button colorScheme="blue" type="submit" disabled>
-              Create Category
-            </Button>
-          )}
-        </form>
+              {newCourse.englishTitle &&
+              newCourse.englishLink &&
+              newCourse.categoryImage ? (
+                <Button colorScheme="blue" type="submit">
+                  Create Category
+                </Button>
+              ) : (
+                <Button colorScheme="blue" type="submit" disabled>
+                  Create Category
+                </Button>
+              )}
+            </Flex>
+          </form>
+        </Box>
       </Flex>
+      <br />
+      <br />
       {allCourses?.data?.map((i) => (
         <Flex gap="5" alignItems="center">
           {i.englishTitle}
@@ -356,6 +374,6 @@ export default function App() {
           )}
         </Flex>
       ))}
-    </Flex>
+    </main>
   );
 }
