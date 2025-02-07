@@ -330,50 +330,52 @@ export default function App() {
       </Flex>
       <br />
       <br />
-      {allCourses?.data?.map((i) => (
-        <Flex gap="5" alignItems="center">
-          {i.englishTitle}
+      <Flex gap="5" flexDirection="column" alignItems="center">
+        {allCourses?.data?.map((i) => (
+          <Flex gap="5" alignItems="center">
+            {i.englishTitle}
 
-          {deleteButton !== i._id ? (
-            <Button
-              colorScheme="red"
-              aria-label="Delete Course"
-              onClick={() => {
-                setDeleteButton(i._id);
-              }}
-            >
-              Delete
-            </Button>
-          ) : deleteButton === i._id ? (
-            <>
+            {deleteButton !== i._id ? (
               <Button
                 colorScheme="red"
+                aria-label="Delete Course"
                 onClick={() => {
-                  deleteCourse(i._id);
-                  toast({
-                    title: `Course "${i.englishTitle}" deleted.`,
-                    status: "success"
-                  });
+                  setDeleteButton(i._id);
                 }}
               >
-                Are you sure?
+                Delete
               </Button>
+            ) : deleteButton === i._id ? (
+              <>
+                <Button
+                  colorScheme="red"
+                  onClick={() => {
+                    deleteCourse(i._id);
+                    toast({
+                      title: `Course "${i.englishTitle}" deleted.`,
+                      status: "success"
+                    });
+                  }}
+                >
+                  Are you sure?
+                </Button>
 
-              <Button
-                variant="outline"
-                colorScheme="red"
-                onClick={() => {
-                  setDeleteButton("");
-                }}
-              >
-                Cancel
-              </Button>
-            </>
-          ) : (
-            ""
-          )}
-        </Flex>
-      ))}
+                <Button
+                  variant="outline"
+                  colorScheme="red"
+                  onClick={() => {
+                    setDeleteButton("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </>
+            ) : (
+              ""
+            )}
+          </Flex>
+        ))}
+      </Flex>
     </main>
   );
 }
