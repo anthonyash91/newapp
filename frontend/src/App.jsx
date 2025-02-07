@@ -10,6 +10,7 @@ import {
   IconButton
 } from "@chakra-ui/react";
 import { FaTrash } from "react-icons/fa6";
+import { IoIosCloseCircle } from "react-icons/io";
 
 export default function App() {
   const [allCourses, setAllCourses] = useState([]);
@@ -36,6 +37,8 @@ export default function App() {
   });
 
   const toast = useToast();
+
+  const [deleteButton, setDeleteButton] = useState("none");
 
   const getCourses = async () => {
     try {
@@ -313,18 +316,44 @@ export default function App() {
         <Flex gap="5" alignItems="center">
           {i.englishTitle}
 
-          <IconButton
-            colorScheme="red"
-            aria-label="Delete Course"
-            onClick={() => {
-              deleteCourse(i._id);
-              toast({
-                title: `Course "${i.englishTitle}" deleted.`,
-                status: "success"
-              });
-            }}
-            icon={<FaTrash />}
-          />
+          {deleteButton !== i._id ? (
+            <Button
+              colorScheme="red"
+              aria-label="Delete Course"
+              onClick={() => {
+                setDeleteButton(i._id);
+              }}
+            >
+              Delete
+            </Button>
+          ) : deleteButton === i._id ? (
+            <>
+              <Button
+                colorScheme="red"
+                onClick={() => {
+                  deleteCourse(i._id);
+                  toast({
+                    title: `Course "${i.englishTitle}" deleted.`,
+                    status: "success"
+                  });
+                }}
+              >
+                Are you sure?
+              </Button>
+
+              <Button
+                variant="outline"
+                colorScheme="red"
+                onClick={() => {
+                  setDeleteButton("");
+                }}
+              >
+                Cancel
+              </Button>
+            </>
+          ) : (
+            ""
+          )}
         </Flex>
       ))}
     </Flex>
