@@ -1,7 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap");
 
+body {
+  margin: 50px !important;
+}
+
 form {
   display: flex;
+  gap: 20px;
   flex-direction: column;
   width: 400px;
 
