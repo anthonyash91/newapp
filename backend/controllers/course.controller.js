@@ -27,14 +27,13 @@ export const getCourse = async (req, res) => {
 
 export const createCourse = async (req, res) => {
   const course = req.body;
-
   const newCourse = new Course(course);
 
   try {
     await newCourse.save();
-    res.status(401).json({ success: true, data: newCourse });
+    res.status(200).json({ success: true, data: course });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server Error" });
+    res.status(400).json({ error: error.message });
   }
 };
 

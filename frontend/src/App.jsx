@@ -15,6 +15,16 @@ export default function App() {
     active: true
   });
 
+  const [allCategories, setAllCategories] = useState([]);
+
+  const [newCategory, setNewCategory] = useState({
+    englishTitle: "",
+    spanishTitle: "",
+    categoryImage: ""
+  });
+
+  const notify = (msg) => toast(msg);
+
   const getCourses = async () => {
     try {
       const res = await fetch("/api/courses");
@@ -35,8 +45,6 @@ export default function App() {
 
       if (res.ok) {
         setSingleCourse(courseData);
-        const notify = () => toast(courseData?.data?.englishTitle);
-        notify();
       }
     } catch (error) {
       console.log(error);
@@ -56,11 +64,74 @@ export default function App() {
       });
 
       if (!res.ok) {
-        const notify = () => toast("Error");
-        notify();
+        notify("Erorr creating course.");
       } else {
-        const notify = () => toast(newCourse?.englishTitle);
-        notify();
+        notify(`${newCourse.englishTitle} created.`);
+        setNewCourse({
+          englishTitle: "",
+          spanishTitle: "",
+          englishLink: "",
+          spanishLink: "",
+          category: "",
+          contentType: "",
+          active: true
+        });
+        getCourses();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteCourse = async (id) => {
+    try {
+      const res = await fetch(`/api/courses/${id}`, {
+        method: "DELETE"
+      });
+
+      if (res.ok) {
+        getCourses();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getCategories = async () => {
+    try {
+      const res = await fetch("/api/categories");
+      const categoriesData = await res.json();
+
+      if (res.ok) {
+        setAllCategories(categoriesData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const createCategory = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        body: JSON.stringify(newCategory),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        notify("Erorr creating category.");
+      } else {
+        notify(`${newCategory.englishTitle} created.`);
+        setNewCategory({
+          englishTitle: "",
+          spanishTitle: "",
+          categoryImage: ""
+        });
+        getCategories();
       }
     } catch (error) {
       console.log(error);
@@ -69,6 +140,7 @@ export default function App() {
 
   useEffect(() => {
     getCourses();
+    getCategories();
   }, []);
 
   return (
@@ -82,7 +154,6 @@ export default function App() {
             setNewCourse({ ...newCourse, englishTitle: e.target.value });
           }}
         />
-
         <input
           placeholder="Spanish Title"
           name="spanishTitle"
@@ -91,7 +162,6 @@ export default function App() {
             setNewCourse({ ...newCourse, spanishTitle: e.target.value });
           }}
         />
-
         <input
           placeholder="English Link"
           name="englishLink"
@@ -100,7 +170,6 @@ export default function App() {
             setNewCourse({ ...newCourse, englishLink: e.target.value });
           }}
         />
-
         <input
           placeholder="Spanish Link"
           name="spanishLink"
@@ -109,20 +178,21 @@ export default function App() {
             setNewCourse({ ...newCourse, spanishLink: e.target.value });
           }}
         />
-
         <select
           name="category"
+          value={newCourse.category}
           onChange={(e) => {
             setNewCourse({ ...newCourse, category: e.target.value });
           }}
         >
           <option></option>
-          <option>Health & Wellness</option>
-          <option>Workforce Integration</option>
+          {allCategories?.data?.map((i) => (
+            <option key={i._id}>{i.englishTitle}</option>
+          ))}
         </select>
-
         <select
           name="contentType"
+          value={newCourse.contentType}
           onChange={(e) => {
             setNewCourse({ ...newCourse, contentType: e.target.value });
           }}
@@ -131,14 +201,16 @@ export default function App() {
           <option>Video</option>
           <option>PDF</option>
         </select>
-
+        Active{" "}
         <input
           type="radio"
           name="active"
           onClick={(e) => {
             setNewCourse({ ...newCourse, active: true });
           }}
+          defaultChecked
         />
+        Inactive{" "}
         <input
           type="radio"
           name="active"
@@ -146,8 +218,38 @@ export default function App() {
             setNewCourse({ ...newCourse, active: false });
           }}
         />
-
         <button type="submit">Create Course</button>
+      </form>
+
+      <form onSubmit={createCategory}>
+        <input
+          placeholder="English Title"
+          name="englishTitle"
+          value={newCategory.englishTitle}
+          onChange={(e) => {
+            setNewCategory({ ...newCategory, englishTitle: e.target.value });
+          }}
+        />
+
+        <input
+          placeholder="Spanish Title"
+          name="spanishTitle"
+          value={newCategory.spanishTitle}
+          onChange={(e) => {
+            setNewCategory({ ...newCategory, spanishTitle: e.target.value });
+          }}
+        />
+
+        <input
+          placeholder="Category Image"
+          name="categoryImage"
+          value={newCategory.categoryImage}
+          onChange={(e) => {
+            setNewCategory({ ...newCategory, categoryImage: e.target.value });
+          }}
+        />
+
+        <button type="submit">Create Category</button>
       </form>
 
       <Toaster
@@ -158,12 +260,14 @@ export default function App() {
 
       {allCourses?.data?.map((i) => (
         <>
+          {i.englishTitle}
           <button
             onClick={() => {
-              getCourse(i._id);
+              deleteCourse(i._id);
+              notify(`${i.englishTitle} deleted.`);
             }}
           >
-            Get Course
+            Delete
           </button>
           <br />
         </>
