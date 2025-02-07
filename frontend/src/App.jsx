@@ -8,11 +8,10 @@ import {
   Flex,
   Box,
   useToast,
-  Spacer,
-  IconButton
+  Spacer
 } from "@chakra-ui/react";
-import { FaTrash } from "react-icons/fa6";
-import { IoIosCloseCircle } from "react-icons/io";
+import { UploadButton } from "@bytescale/upload-widget-react";
+import env from "react-dotenv";
 
 export default function App() {
   const [allCourses, setAllCourses] = useState([]);
@@ -168,6 +167,18 @@ export default function App() {
     }
   };
 
+  const options = {
+    apiKey: "public_223k24FBYTp3msVUE8shtNXQk57H", // This is your API key.
+    maxFileCount: 1,
+    showFinishButton: false,
+    editor: {
+      images: {
+        crop: false,
+        preview: false
+      }
+    }
+  };
+
   useEffect(() => {
     getCourses();
     getCategories();
@@ -195,6 +206,19 @@ export default function App() {
                   setNewCourse({ ...newCourse, englishLink: e.target.value });
                 }}
               />
+              <UploadButton
+                options={options}
+                onComplete={(files) =>
+                  setNewCourse({
+                    ...newCourse,
+                    englishLink: files.map((x) => x.fileUrl).join("\n")
+                  })
+                }
+              >
+                {({ onClick }) => (
+                  <Button onClick={onClick}>Upload a file...</Button>
+                )}
+              </UploadButton>
               <Input
                 placeholder="Spanish Title"
                 name="spanishTitle"
@@ -312,10 +336,21 @@ export default function App() {
                   });
                 }}
               />
+              <UploadButton
+                options={options}
+                onComplete={(files) =>
+                  setNewCategory({
+                    ...newCourse,
+                    categoryImage: files.map((x) => x.fileUrl).join("\n")
+                  })
+                }
+              >
+                {({ onClick }) => (
+                  <Button onClick={onClick}>Upload a file...</Button>
+                )}
+              </UploadButton>
 
-              {newCourse.englishTitle &&
-              newCourse.englishLink &&
-              newCourse.categoryImage ? (
+              {newCategory.englishTitle && newCategory.categoryImage ? (
                 <Button colorScheme="blue" type="submit">
                   Create Category
                 </Button>
