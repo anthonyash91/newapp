@@ -11,7 +11,6 @@ import {
   Spacer
 } from "@chakra-ui/react";
 import { UploadButton } from "@bytescale/upload-widget-react";
-import env from "react-dotenv";
 
 export default function App() {
   const [allCourses, setAllCourses] = useState([]);
