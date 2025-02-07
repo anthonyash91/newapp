@@ -82,7 +82,7 @@ export default function App() {
         });
       } else {
         toast({
-          title: `${newCourse.englishTitle} created.`,
+          title: `Course "${newCourse.englishTitle}" created.`,
           status: "success"
         });
         setNewCourse({
@@ -148,7 +148,7 @@ export default function App() {
         });
       } else {
         toast({
-          title: `${newCategory.englishTitle} created.`,
+          title: `Category "${newCategory.englishTitle}" created.`,
           status: "success"
         });
         setNewCategory({
@@ -184,19 +184,19 @@ export default function App() {
             }}
           />
           <Input
-            placeholder="Spanish Title"
-            name="spanishTitle"
-            value={newCourse.spanishTitle}
-            onChange={(e) => {
-              setNewCourse({ ...newCourse, spanishTitle: e.target.value });
-            }}
-          />
-          <Input
             placeholder="English Link"
             name="englishLink"
             value={newCourse.englishLink}
             onChange={(e) => {
               setNewCourse({ ...newCourse, englishLink: e.target.value });
+            }}
+          />
+          <Input
+            placeholder="Spanish Title"
+            name="spanishTitle"
+            value={newCourse.spanishTitle}
+            onChange={(e) => {
+              setNewCourse({ ...newCourse, spanishTitle: e.target.value });
             }}
           />
           <Input
@@ -319,7 +319,7 @@ export default function App() {
             onClick={() => {
               deleteCourse(i._id);
               toast({
-                title: `${i.englishTitle} deleted.`,
+                title: `Course "${i.englishTitle}" deleted.`,
                 status: "success"
               });
             }}
