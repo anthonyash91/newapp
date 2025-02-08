@@ -31,7 +31,18 @@ export default function App() {
   const [singleCourse, setSingleCourse] = useState([]);
 
   const [showForm, setShowForm] = useState(false);
+
   const [newCourse, setNewCourse] = useState({
+    englishTitle: "",
+    spanishTitle: "",
+    englishLink: "",
+    spanishLink: "",
+    category: "",
+    contentType: "",
+    active: true
+  });
+
+  const [updateSingleCourse, setUpdateSingleCourse] = useState({
     englishTitle: "",
     spanishTitle: "",
     englishLink: "",
@@ -43,6 +54,7 @@ export default function App() {
   });
 
   const [showSpanishCourse, setShowSpanishCourse] = useState(false);
+  const [showSpanishCourseEdit, setShowSpanishCourseEdit] = useState(null);
 
   const clearCourseForm = () => {
     setShowSpanishCourse(false);
@@ -135,13 +147,15 @@ export default function App() {
     }
   };
 
+  const [showEditSection, setShowEditSection] = useState(null);
+
   const updateCourse = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await fetch(`/api/courses/${newCourse.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(newCourse),
+      const res = await fetch(`/api/courses/${updateSingleCourse.id}`, {
+        method: "PUT",
+        body: JSON.stringify(updateSingleCourse),
         headers: {
           "Content-Type": "application/json"
         }
@@ -154,7 +168,7 @@ export default function App() {
         });
       } else {
         toast({
-          title: `Course "${newCourse.englishTitle}" updated.`,
+          title: `Course "${updateSingleCourse.englishTitle}" updated.`,
           status: "success"
         });
         getCourses();
@@ -243,264 +257,41 @@ export default function App() {
   return (
     <main>
       <Flex flexDirection="column" gap="50" w="60%" justifyContent="center">
-        <AnimatePresence>
-          {showForm ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-            >
-              <form onSubmit={createCourse}>
-                <Flex flexDirection="column" gap="5">
-                  <Input
-                    placeholder="English Title"
-                    name="englishTitle"
-                    value={newCourse.englishTitle}
-                    onChange={(e) => {
-                      setNewCourse({
-                        ...newCourse,
-                        englishTitle: e.target.value
-                      });
-                    }}
-                  />
-
-                  <InputGroup size="md" gap="3">
-                    <Input
-                      placeholder="English Link"
-                      name="englishLink"
-                      value={newCourse.englishLink}
-                      onChange={(e) => {
-                        setNewCourse({
-                          ...newCourse,
-                          englishLink: e.target.value
-                        });
-                      }}
-                      type="URL"
-                    />
-
-                    <UploadButton
-                      options={options}
-                      onComplete={(files) =>
-                        setNewCourse({
-                          ...newCourse,
-                          englishLink: files.map((x) => x.fileUrl).join("\n")
-                        })
-                      }
-                    >
-                      {({ onClick }) => (
-                        <IconButton icon={<MdFileUpload />} onClick={onClick} />
-                      )}
-                    </UploadButton>
-                  </InputGroup>
-
-                  {showSpanishCourse && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                    >
-                      <Flex flexDirection="column" gap="5">
-                        <Input
-                          placeholder="Spanish Title"
-                          name="spanishTitle"
-                          value={newCourse.spanishTitle}
-                          onChange={(e) => {
-                            setNewCourse({
-                              ...newCourse,
-                              spanishTitle: e.target.value
-                            });
-                          }}
-                        />
-                        <InputGroup size="md" gap="3">
-                          <Input
-                            placeholder="Spanish Link"
-                            name="spanishLink"
-                            value={newCourse.spanishLink}
-                            onChange={(e) => {
-                              setNewCourse({
-                                ...newCourse,
-                                spanishLink: e.target.value
-                              });
-                            }}
-                            type="URL"
-                          />
-                          <UploadButton
-                            options={options}
-                            onComplete={(files) =>
-                              setNewCourse({
-                                ...newCourse,
-                                spanishLink: files
-                                  .map((x) => x.fileUrl)
-                                  .join("\n")
-                              })
-                            }
-                          >
-                            {({ onClick }) => (
-                              <IconButton
-                                icon={<MdFileUpload />}
-                                onClick={onClick}
-                              />
-                            )}
-                          </UploadButton>
-                        </InputGroup>
-                      </Flex>
-                    </motion.div>
-                  )}
-
-                  {!showSpanishCourse && (
-                    <Button
-                      onClick={() => {
-                        setShowSpanishCourse(true);
-                      }}
-                    >
-                      Add Spanish
-                    </Button>
-                  )}
-
-                  <Select
-                    placeholder="Choose a category"
-                    name="category"
-                    value={newCourse.category}
-                    onChange={(e) => {
-                      setNewCourse({ ...newCourse, category: e.target.value });
-                    }}
-                  >
-                    {allCategories?.data?.map((i) => (
-                      <option key={i._id}>{i.englishTitle}</option>
-                    ))}
-                  </Select>
-                  <Select
-                    placeholder="Choose content type"
-                    name="contentType"
-                    value={newCourse.contentType}
-                    onChange={(e) => {
-                      setNewCourse({
-                        ...newCourse,
-                        contentType: e.target.value
-                      });
-                    }}
-                  >
-                    <option>Video</option>
-                    <option>PDF</option>
-                  </Select>
-
-                  <ButtonGroup>
-                    <Button
-                      flex="1"
-                      variant={newCourse.active ? "outline" : "outline"}
-                      colorScheme={newCourse.active ? "green" : "gray"}
-                      onClick={(e) =>
-                        setNewCourse({ ...newCourse, active: true })
-                      }
-                    >
-                      Active
-                    </Button>
-                    <Button
-                      flex="1"
-                      variant={!newCourse.active ? "outline" : "outline"}
-                      colorScheme={!newCourse.active ? "red" : "gray"}
-                      onClick={(e) =>
-                        setNewCourse({ ...newCourse, active: false })
-                      }
-                    >
-                      Inactive
-                    </Button>
-                  </ButtonGroup>
-                  <Button
-                    colorScheme="blue"
-                    type="submit"
-                    w="100%"
-                    pointerEvents={
-                      newCourse.englishTitle &&
-                      newCourse.englishLink &&
-                      newCourse.category &&
-                      newCourse.contentType
-                        ? ""
-                        : "none"
-                    }
-                    opacity={
-                      newCourse.englishTitle &&
-                      newCourse.englishLink &&
-                      newCourse.category &&
-                      newCourse.contentType
-                        ? "1"
-                        : "0.3"
-                    }
-                  >
-                    Create{" "}
-                    {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
-                    Course
-                  </Button>
-                </Flex>
-              </form>
-            </motion.div>
-          ) : (
-            <Button
-              colorScheme="blue"
-              onClick={() => {
-                setShowForm(true);
-              }}
-            >
-              Add New Course
-            </Button>
-          )}
-        </AnimatePresence>
-        {/* <Box flexBasis="100%">
-          <Spacer />
-          <form onSubmit={createCategory}>
-            <Flex flexDirection="column" gap="5" w="100%">
+        {showForm ? (
+          <form onSubmit={createCourse}>
+            <Flex flexDirection="column" gap="5">
               <Input
                 placeholder="English Title"
                 name="englishTitle"
-                value={newCategory.englishTitle}
+                value={newCourse.englishTitle}
                 onChange={(e) => {
-                  setNewCategory({
-                    ...newCategory,
+                  setNewCourse({
+                    ...newCourse,
                     englishTitle: e.target.value
                   });
                 }}
               />
 
-              {showSpanishCategory && (
-                <Input
-                  placeholder="Spanish Title"
-                  name="spanishTitle"
-                  value={newCategory.spanishTitle}
-                  onChange={(e) => {
-                    setNewCategory({
-                      ...newCategory,
-                      spanishTitle: e.target.value
-                    });
-                  }}
-                />
-              )}
-
-              {!showSpanishCategory && (
-                <Button
-                  onClick={() => {
-                    setShowSpanishCategory(true);
-                  }}
-                >
-                  Add Spanish
-                </Button>
-              )}
-
               <InputGroup size="md" gap="3">
                 <Input
-                  placeholder="Category Image"
-                  name="categoryImage"
-                  value={newCategory.categoryImage}
+                  placeholder="English Link"
+                  name="englishLink"
+                  value={newCourse.englishLink}
                   onChange={(e) => {
-                    setNewCourse({ ...newCourse, spanishLink: e.target.value });
+                    setNewCourse({
+                      ...newCourse,
+                      englishLink: e.target.value
+                    });
                   }}
                   type="URL"
                 />
+
                 <UploadButton
                   options={options}
                   onComplete={(files) =>
-                    setNewCategory({
-                      ...newCategory,
-                      categoryImage: files.map((x) => x.fileUrl).join("\n")
+                    setNewCourse({
+                      ...newCourse,
+                      englishLink: files.map((x) => x.fileUrl).join("\n")
                     })
                   }
                 >
@@ -510,26 +301,150 @@ export default function App() {
                 </UploadButton>
               </InputGroup>
 
-              {newCategory.englishTitle && newCategory.categoryImage ? (
-                <Button colorScheme="blue" type="submit">
-                  Create{" "}
-                  {newCategory.englishTitle && (
-                    <>"{newCategory.englishTitle}"</>
-                  )}{" "}
-                  Category
-                </Button>
-              ) : (
-                <Button colorScheme="blue" type="submit" disabled>
-                  Create{" "}
-                  {newCategory.englishTitle && (
-                    <>"{newCategory.englishTitle}"</>
-                  )}{" "}
-                  Category
+              {showSpanishCourse && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                >
+                  <Flex flexDirection="column" gap="5">
+                    <Input
+                      placeholder="Spanish Title"
+                      name="spanishTitle"
+                      value={newCourse.spanishTitle}
+                      onChange={(e) => {
+                        setNewCourse({
+                          ...newCourse,
+                          spanishTitle: e.target.value
+                        });
+                      }}
+                    />
+                    <InputGroup size="md" gap="3">
+                      <Input
+                        placeholder="Spanish Link"
+                        name="spanishLink"
+                        value={newCourse.spanishLink}
+                        onChange={(e) => {
+                          setNewCourse({
+                            ...newCourse,
+                            spanishLink: e.target.value
+                          });
+                        }}
+                        type="URL"
+                      />
+                      <UploadButton
+                        options={options}
+                        onComplete={(files) =>
+                          setNewCourse({
+                            ...newCourse,
+                            spanishLink: files.map((x) => x.fileUrl).join("\n")
+                          })
+                        }
+                      >
+                        {({ onClick }) => (
+                          <IconButton
+                            icon={<MdFileUpload />}
+                            onClick={onClick}
+                          />
+                        )}
+                      </UploadButton>
+                    </InputGroup>
+                  </Flex>
+                </motion.div>
+              )}
+
+              {!showSpanishCourse && (
+                <Button
+                  onClick={() => {
+                    setShowSpanishCourse(true);
+                  }}
+                >
+                  Add Spanish
                 </Button>
               )}
+
+              <Select
+                placeholder="Choose a category"
+                name="category"
+                value={newCourse.category}
+                onChange={(e) => {
+                  setNewCourse({ ...newCourse, category: e.target.value });
+                }}
+              >
+                {allCategories?.data?.map((i) => (
+                  <option key={i._id}>{i.englishTitle}</option>
+                ))}
+              </Select>
+              <Select
+                placeholder="Choose content type"
+                name="contentType"
+                value={newCourse.contentType}
+                onChange={(e) => {
+                  setNewCourse({
+                    ...newCourse,
+                    contentType: e.target.value
+                  });
+                }}
+              >
+                <option>Video</option>
+                <option>PDF</option>
+              </Select>
+
+              <ButtonGroup>
+                <Button
+                  flex="1"
+                  variant={newCourse.active ? "outline" : "outline"}
+                  colorScheme={newCourse.active ? "green" : "gray"}
+                  onClick={(e) => setNewCourse({ ...newCourse, active: true })}
+                >
+                  Active
+                </Button>
+                <Button
+                  flex="1"
+                  variant={!newCourse.active ? "outline" : "outline"}
+                  colorScheme={!newCourse.active ? "red" : "gray"}
+                  onClick={(e) => setNewCourse({ ...newCourse, active: false })}
+                >
+                  Inactive
+                </Button>
+              </ButtonGroup>
+              <Button
+                colorScheme="blue"
+                type="submit"
+                w="100%"
+                pointerEvents={
+                  newCourse.englishTitle &&
+                  newCourse.englishLink &&
+                  newCourse.category &&
+                  newCourse.contentType
+                    ? ""
+                    : "none"
+                }
+                opacity={
+                  newCourse.englishTitle &&
+                  newCourse.englishLink &&
+                  newCourse.category &&
+                  newCourse.contentType
+                    ? "1"
+                    : "0.3"
+                }
+              >
+                Create{" "}
+                {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
+                Course
+              </Button>
             </Flex>
           </form>
-        </Box> */}
+        ) : (
+          <Button
+            colorScheme="blue"
+            onClick={() => {
+              setShowForm(true);
+            }}
+          >
+            Add New Course
+          </Button>
+        )}
       </Flex>
 
       <br />
@@ -538,19 +453,17 @@ export default function App() {
         <AnimatePresence>
           {allCourses?.data
             ?.map((i) => (
-              <>
-                <motion.div
-                  key={i._id}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                >
+              <motion.div
+                key={i._id}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+              >
+                <Flex flexDirection="column">
                   <Flex
                     justifyContent="space-between"
                     alignItems="center"
                     flexDirection="row"
-                    gap="3"
-                    bg="#fff"
                     border="1px"
                     borderColor="#eee"
                     pb="3"
@@ -581,7 +494,17 @@ export default function App() {
                         size="sm"
                         onClick={() => {
                           getCourse(i._id);
-                          setNewCourse({
+                          if (showEditSection !== i._id) {
+                            setShowEditSection(i._id);
+                          } else {
+                            setShowEditSection(null);
+                          }
+                          if (i.spanishTitle) {
+                            setShowSpanishCourseEdit(i._id);
+                          } else {
+                            setShowSpanishCourseEdit(null);
+                          }
+                          setUpdateSingleCourse({
                             englishTitle: i.englishTitle,
                             englishLink: i.englishLink,
                             spanishTitle: i.spanishTitle,
@@ -639,91 +562,49 @@ export default function App() {
                       </Popover>
                     </Flex>
                   </Flex>
-                </motion.div>
 
-                <form onSubmit={updateCourse}>
-                  <Flex flexDirection="column" gap="5">
-                    <Input
-                      placeholder="English Title"
-                      name="englishTitle"
-                      value={newCourse.englishTitle}
-                      onChange={(e) => {
-                        setNewCourse({
-                          ...newCourse,
-                          englishTitle: e.target.value
-                        });
-                      }}
-                    />
-
-                    <InputGroup size="md" gap="3">
-                      <Input
-                        placeholder="English Link"
-                        name="englishLink"
-                        value={newCourse.englishLink}
-                        onChange={(e) => {
-                          setNewCourse({
-                            ...newCourse,
-                            englishLink: e.target.value
-                          });
-                        }}
-                        type="URL"
-                      />
-
-                      <UploadButton
-                        options={options}
-                        onComplete={(files) =>
-                          setNewCourse({
-                            ...newCourse,
-                            englishLink: files.map((x) => x.fileUrl).join("\n")
-                          })
-                        }
-                      >
-                        {({ onClick }) => (
-                          <IconButton
-                            icon={<MdFileUpload />}
-                            onClick={onClick}
-                          />
-                        )}
-                      </UploadButton>
-                    </InputGroup>
-
-                    {showSpanishCourse && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0 }}
-                      >
+                  {showEditSection === i._id && (
+                    <Box
+                      mt="5"
+                      border="1px"
+                      borderColor="#eee"
+                      p="6"
+                      borderRadius="8"
+                    >
+                      <form onSubmit={updateCourse}>
                         <Flex flexDirection="column" gap="5">
                           <Input
-                            placeholder="Spanish Title"
-                            name="spanishTitle"
-                            value={newCourse.spanishTitle}
+                            placeholder="English Title"
+                            name="englishTitle"
+                            value={updateSingleCourse.englishTitle}
                             onChange={(e) => {
-                              setNewCourse({
-                                ...newCourse,
-                                spanishTitle: e.target.value
+                              setUpdateSingleCourse({
+                                ...updateSingleCourse,
+                                englishTitle: e.target.value
                               });
                             }}
                           />
+
                           <InputGroup size="md" gap="3">
                             <Input
-                              placeholder="Spanish Link"
-                              name="spanishLink"
-                              value={newCourse.spanishLink}
+                              placeholder="English Link"
+                              name="englishLink"
+                              value={updateSingleCourse.englishLink}
                               onChange={(e) => {
-                                setNewCourse({
-                                  ...newCourse,
-                                  spanishLink: e.target.value
+                                setUpdateSingleCourse({
+                                  ...updateSingleCourse,
+                                  englishLink: e.target.value
                                 });
                               }}
                               type="URL"
                             />
+
                             <UploadButton
                               options={options}
                               onComplete={(files) =>
-                                setNewCourse({
-                                  ...newCourse,
-                                  spanishLink: files
+                                setUpdateSingleCourse({
+                                  ...updateSingleCourse,
+                                  englishLink: files
                                     .map((x) => x.fileUrl)
                                     .join("\n")
                                 })
@@ -737,102 +618,219 @@ export default function App() {
                               )}
                             </UploadButton>
                           </InputGroup>
+                          {}
+                          {showSpanishCourseEdit === i._id &&
+                          i.spanishTitle !== "" ? (
+                            <Flex flexDirection="column" gap="5">
+                              <Input
+                                placeholder="Spanish Title"
+                                name="spanishTitle"
+                                value={updateSingleCourse.spanishTitle}
+                                onChange={(e) => {
+                                  setUpdateSingleCourse({
+                                    ...updateSingleCourse,
+                                    spanishTitle: e.target.value
+                                  });
+                                }}
+                              />
+                              <InputGroup size="md" gap="3">
+                                <Input
+                                  placeholder="Spanish Link"
+                                  name="spanishLink"
+                                  value={updateSingleCourse.spanishLink}
+                                  onChange={(e) => {
+                                    setUpdateSingleCourse({
+                                      ...updateSingleCourse,
+                                      spanishLink: e.target.value
+                                    });
+                                  }}
+                                  type="URL"
+                                />
+                                <UploadButton
+                                  options={options}
+                                  onComplete={(files) =>
+                                    setUpdateSingleCourse({
+                                      ...updateSingleCourse,
+                                      spanishLink: files
+                                        .map((x) => x.fileUrl)
+                                        .join("\n")
+                                    })
+                                  }
+                                >
+                                  {({ onClick }) => (
+                                    <IconButton
+                                      icon={<MdFileUpload />}
+                                      onClick={onClick}
+                                    />
+                                  )}
+                                </UploadButton>
+                              </InputGroup>
+                            </Flex>
+                          ) : showSpanishCourseEdit === i._id &&
+                            !i.spanishTitle ? (
+                            <Flex flexDirection="column" gap="5">
+                              <Input
+                                placeholder="Spanish Title"
+                                name="spanishTitle"
+                                value={updateSingleCourse.spanishTitle}
+                                onChange={(e) => {
+                                  setUpdateSingleCourse({
+                                    ...updateSingleCourse,
+                                    spanishTitle: e.target.value
+                                  });
+                                }}
+                              />
+                              <InputGroup size="md" gap="3">
+                                <Input
+                                  placeholder="Spanish Link"
+                                  name="spanishLink"
+                                  value={updateSingleCourse.spanishLink}
+                                  onChange={(e) => {
+                                    setUpdateSingleCourse({
+                                      ...updateSingleCourse,
+                                      spanishLink: e.target.value
+                                    });
+                                  }}
+                                  type="URL"
+                                />
+                                <UploadButton
+                                  options={options}
+                                  onComplete={(files) =>
+                                    setUpdateSingleCourse({
+                                      ...updateSingleCourse,
+                                      spanishLink: files
+                                        .map((x) => x.fileUrl)
+                                        .join("\n")
+                                    })
+                                  }
+                                >
+                                  {({ onClick }) => (
+                                    <IconButton
+                                      icon={<MdFileUpload />}
+                                      onClick={onClick}
+                                    />
+                                  )}
+                                </UploadButton>
+                              </InputGroup>
+                            </Flex>
+                          ) : (
+                            ""
+                          )}
+
+                          {showSpanishCourseEdit !== i._id &&
+                            !i.spanishTitle && (
+                              <Button
+                                onClick={() => {
+                                  setShowSpanishCourseEdit(i._id);
+                                }}
+                              >
+                                Add Spanish
+                              </Button>
+                            )}
+
+                          <Select
+                            placeholder="Choose a category"
+                            name="category"
+                            value={updateSingleCourse.category}
+                            onChange={(e) => {
+                              setUpdateSingleCourse({
+                                ...updateSingleCourse,
+                                category: e.target.value
+                              });
+                            }}
+                          >
+                            {allCategories?.data?.map((i) => (
+                              <option key={i._id}>{i.englishTitle}</option>
+                            ))}
+                          </Select>
+                          <Select
+                            placeholder="Choose content type"
+                            name="contentType"
+                            value={updateSingleCourse.contentType}
+                            onChange={(e) => {
+                              setUpdateSingleCourse({
+                                ...updateSingleCourse,
+                                contentType: e.target.value
+                              });
+                            }}
+                          >
+                            <option>Video</option>
+                            <option>PDF</option>
+                          </Select>
+
+                          <ButtonGroup>
+                            <Button
+                              flex="1"
+                              variant={
+                                updateSingleCourse.active
+                                  ? "outline"
+                                  : "outline"
+                              }
+                              colorScheme={
+                                updateSingleCourse.active ? "green" : "gray"
+                              }
+                              onClick={(e) =>
+                                setUpdateSingleCourse({
+                                  ...updateSingleCourse,
+                                  active: true
+                                })
+                              }
+                            >
+                              Active
+                            </Button>
+                            <Button
+                              flex="1"
+                              variant={
+                                !updateSingleCourse.active
+                                  ? "outline"
+                                  : "outline"
+                              }
+                              colorScheme={
+                                !updateSingleCourse.active ? "red" : "gray"
+                              }
+                              onClick={(e) =>
+                                setUpdateSingleCourse({
+                                  ...updateSingleCourse,
+                                  active: false
+                                })
+                              }
+                            >
+                              Inactive
+                            </Button>
+                          </ButtonGroup>
+                          <Button
+                            colorScheme="blue"
+                            type="submit"
+                            w="100%"
+                            pointerEvents={
+                              updateSingleCourse.englishTitle &&
+                              updateSingleCourse.englishLink &&
+                              updateSingleCourse.category &&
+                              updateSingleCourse.contentType
+                                ? ""
+                                : "none"
+                            }
+                            opacity={
+                              updateSingleCourse.englishTitle &&
+                              updateSingleCourse.englishLink &&
+                              updateSingleCourse.category &&
+                              updateSingleCourse.contentType
+                                ? "1"
+                                : "0.3"
+                            }
+                          >
+                            Update{" "}
+                            {updateSingleCourse.englishTitle && (
+                              <>"{updateSingleCourse.englishTitle}"</>
+                            )}{" "}
+                            Course
+                          </Button>
                         </Flex>
-                      </motion.div>
-                    )}
-
-                    {!showSpanishCourse && (
-                      <Button
-                        onClick={() => {
-                          setShowSpanishCourse(true);
-                        }}
-                      >
-                        Add Spanish
-                      </Button>
-                    )}
-
-                    <Select
-                      placeholder="Choose a category"
-                      name="category"
-                      value={newCourse.category}
-                      onChange={(e) => {
-                        setNewCourse({
-                          ...newCourse,
-                          category: e.target.value
-                        });
-                      }}
-                    >
-                      {allCategories?.data?.map((i) => (
-                        <option key={i._id}>{i.englishTitle}</option>
-                      ))}
-                    </Select>
-                    <Select
-                      placeholder="Choose content type"
-                      name="contentType"
-                      value={newCourse.contentType}
-                      onChange={(e) => {
-                        setNewCourse({
-                          ...newCourse,
-                          contentType: e.target.value
-                        });
-                      }}
-                    >
-                      <option>Video</option>
-                      <option>PDF</option>
-                    </Select>
-
-                    <ButtonGroup>
-                      <Button
-                        flex="1"
-                        variant={newCourse.active ? "outline" : "outline"}
-                        colorScheme={newCourse.active ? "green" : "gray"}
-                        onClick={(e) =>
-                          setNewCourse({ ...newCourse, active: true })
-                        }
-                      >
-                        Active
-                      </Button>
-                      <Button
-                        flex="1"
-                        variant={!newCourse.active ? "outline" : "outline"}
-                        colorScheme={!newCourse.active ? "red" : "gray"}
-                        onClick={(e) =>
-                          setNewCourse({ ...newCourse, active: false })
-                        }
-                      >
-                        Inactive
-                      </Button>
-                    </ButtonGroup>
-                    <Button
-                      colorScheme="blue"
-                      type="submit"
-                      w="100%"
-                      pointerEvents={
-                        newCourse.englishTitle &&
-                        newCourse.englishLink &&
-                        newCourse.category &&
-                        newCourse.contentType
-                          ? ""
-                          : "none"
-                      }
-                      opacity={
-                        newCourse.englishTitle &&
-                        newCourse.englishLink &&
-                        newCourse.category &&
-                        newCourse.contentType
-                          ? "1"
-                          : "0.3"
-                      }
-                    >
-                      Update{" "}
-                      {newCourse.englishTitle && (
-                        <>"{newCourse.englishTitle}"</>
-                      )}{" "}
-                      Course
-                    </Button>
-                  </Flex>
-                </form>
-              </>
+                      </form>
+                    </Box>
+                  )}
+                </Flex>
+              </motion.div>
             ))
             .reverse()}
         </AnimatePresence>
