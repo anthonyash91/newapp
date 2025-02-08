@@ -38,7 +38,8 @@ export default function App() {
     spanishLink: "",
     category: "",
     contentType: "",
-    active: true
+    active: true,
+    id: ""
   });
 
   const [showSpanishCourse, setShowSpanishCourse] = useState(false);
@@ -132,6 +133,33 @@ export default function App() {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const updateCourse = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch(`/api/courses/${newCourse.id}`, {
+        method: "PATCH",
+        body: JSON.stringify(newCourse),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!res.ok) {
+        toast({
+          title: "Error updating course.",
+          status: "error"
+        });
+      } else {
+        toast({
+          title: `Course "${newCourse.englishTitle}" updated.`,
+          status: "success"
+        });
+        getCourses();
+      }
+    } catch (error) {}
   };
 
   const deleteCourse = async (id, name) => {
@@ -510,97 +538,301 @@ export default function App() {
         <AnimatePresence>
           {allCourses?.data
             ?.map((i) => (
-              <motion.div
-                key={i._id}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0 }}
-              >
-                <Flex
-                  justifyContent="space-between"
-                  alignItems="center"
-                  flexDirection="row"
-                  gap="3"
-                  bg="#fff"
-                  border="1px"
-                  borderColor="#eee"
-                  pb="3"
-                  pt="3"
-                  pl="6"
-                  pr="6"
-                  borderRadius="8"
+              <>
+                <motion.div
+                  key={i._id}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
                 >
-                  <Flex flexDirection="row" alignItems="center" gap="5">
-                    <div>
-                      {i.contentType === "PDF" ? (
-                        <FaFilePdf fontSize="30px" />
-                      ) : i.contentType === "Video" ? (
-                        <FaFileVideo fontSize="30px" />
-                      ) : (
-                        ""
-                      )}
-                    </div>
-                    <div>
-                      {i.englishTitle}
-                      <br />
-                      {i.category}
-                    </div>
-                  </Flex>
+                  <Flex
+                    justifyContent="space-between"
+                    alignItems="center"
+                    flexDirection="row"
+                    gap="3"
+                    bg="#fff"
+                    border="1px"
+                    borderColor="#eee"
+                    pb="3"
+                    pt="3"
+                    pl="6"
+                    pr="6"
+                    borderRadius="8"
+                  >
+                    <Flex flexDirection="row" alignItems="center" gap="5">
+                      <div>
+                        {i.contentType === "PDF" ? (
+                          <FaFilePdf fontSize="30px" />
+                        ) : i.contentType === "Video" ? (
+                          <FaFileVideo fontSize="30px" />
+                        ) : (
+                          ""
+                        )}
+                      </div>
+                      <div>
+                        {i.englishTitle}
+                        <br />
+                        {i.category}
+                      </div>
+                    </Flex>
 
-                  <Flex gap="3" flexWrap="wrap">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        getCourse(i._id);
+                    <Flex gap="3" flexWrap="wrap">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          getCourse(i._id);
+                          setNewCourse({
+                            englishTitle: i.englishTitle,
+                            englishLink: i.englishLink,
+                            spanishTitle: i.spanishTitle,
+                            spanishLink: i.spanishLink,
+                            category: i.category,
+                            contentType: i.contentType,
+                            active: i.active,
+                            id: i._id
+                          });
+                        }}
+                      >
+                        Edit
+                      </Button>
+                      <Popover>
+                        {({ onClose }) => (
+                          <>
+                            <PopoverTrigger>
+                              <Button colorScheme="red" size="sm">
+                                Delete
+                              </Button>
+                            </PopoverTrigger>
+                            <Portal>
+                              <PopoverContent>
+                                <PopoverArrow />
+
+                                <PopoverBody pt="4" pb="4" pl="6" pr="6">
+                                  Are you sure you want to delete "
+                                  <b>{i.englishTitle}</b>
+                                  "?
+                                </PopoverBody>
+                                <PopoverFooter p="3">
+                                  <ButtonGroup
+                                    size="sm"
+                                    display="flex"
+                                    justifyContent="flex-end"
+                                  >
+                                    <Button variant="outline" onClick={onClose}>
+                                      Cancel
+                                    </Button>
+                                    <Button
+                                      colorScheme="red"
+                                      onClick={() => {
+                                        deleteCourse(i._id, i.englishTitle);
+                                        onClose();
+                                      }}
+                                    >
+                                      <FaTrash />
+                                    </Button>
+                                  </ButtonGroup>
+                                </PopoverFooter>
+                              </PopoverContent>
+                            </Portal>
+                          </>
+                        )}
+                      </Popover>
+                    </Flex>
+                  </Flex>
+                </motion.div>
+
+                <form onSubmit={updateCourse}>
+                  <Flex flexDirection="column" gap="5">
+                    <Input
+                      placeholder="English Title"
+                      name="englishTitle"
+                      value={newCourse.englishTitle}
+                      onChange={(e) => {
+                        setNewCourse({
+                          ...newCourse,
+                          englishTitle: e.target.value
+                        });
+                      }}
+                    />
+
+                    <InputGroup size="md" gap="3">
+                      <Input
+                        placeholder="English Link"
+                        name="englishLink"
+                        value={newCourse.englishLink}
+                        onChange={(e) => {
+                          setNewCourse({
+                            ...newCourse,
+                            englishLink: e.target.value
+                          });
+                        }}
+                        type="URL"
+                      />
+
+                      <UploadButton
+                        options={options}
+                        onComplete={(files) =>
+                          setNewCourse({
+                            ...newCourse,
+                            englishLink: files.map((x) => x.fileUrl).join("\n")
+                          })
+                        }
+                      >
+                        {({ onClick }) => (
+                          <IconButton
+                            icon={<MdFileUpload />}
+                            onClick={onClick}
+                          />
+                        )}
+                      </UploadButton>
+                    </InputGroup>
+
+                    {showSpanishCourse && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0 }}
+                      >
+                        <Flex flexDirection="column" gap="5">
+                          <Input
+                            placeholder="Spanish Title"
+                            name="spanishTitle"
+                            value={newCourse.spanishTitle}
+                            onChange={(e) => {
+                              setNewCourse({
+                                ...newCourse,
+                                spanishTitle: e.target.value
+                              });
+                            }}
+                          />
+                          <InputGroup size="md" gap="3">
+                            <Input
+                              placeholder="Spanish Link"
+                              name="spanishLink"
+                              value={newCourse.spanishLink}
+                              onChange={(e) => {
+                                setNewCourse({
+                                  ...newCourse,
+                                  spanishLink: e.target.value
+                                });
+                              }}
+                              type="URL"
+                            />
+                            <UploadButton
+                              options={options}
+                              onComplete={(files) =>
+                                setNewCourse({
+                                  ...newCourse,
+                                  spanishLink: files
+                                    .map((x) => x.fileUrl)
+                                    .join("\n")
+                                })
+                              }
+                            >
+                              {({ onClick }) => (
+                                <IconButton
+                                  icon={<MdFileUpload />}
+                                  onClick={onClick}
+                                />
+                              )}
+                            </UploadButton>
+                          </InputGroup>
+                        </Flex>
+                      </motion.div>
+                    )}
+
+                    {!showSpanishCourse && (
+                      <Button
+                        onClick={() => {
+                          setShowSpanishCourse(true);
+                        }}
+                      >
+                        Add Spanish
+                      </Button>
+                    )}
+
+                    <Select
+                      placeholder="Choose a category"
+                      name="category"
+                      value={newCourse.category}
+                      onChange={(e) => {
+                        setNewCourse({
+                          ...newCourse,
+                          category: e.target.value
+                        });
                       }}
                     >
-                      Edit
-                    </Button>
-                    <Popover>
-                      {({ onClose }) => (
-                        <>
-                          <PopoverTrigger>
-                            <Button colorScheme="red" size="sm">
-                              Delete
-                            </Button>
-                          </PopoverTrigger>
-                          <Portal>
-                            <PopoverContent>
-                              <PopoverArrow />
+                      {allCategories?.data?.map((i) => (
+                        <option key={i._id}>{i.englishTitle}</option>
+                      ))}
+                    </Select>
+                    <Select
+                      placeholder="Choose content type"
+                      name="contentType"
+                      value={newCourse.contentType}
+                      onChange={(e) => {
+                        setNewCourse({
+                          ...newCourse,
+                          contentType: e.target.value
+                        });
+                      }}
+                    >
+                      <option>Video</option>
+                      <option>PDF</option>
+                    </Select>
 
-                              <PopoverBody pt="4" pb="4" pl="6" pr="6">
-                                Are you sure you want to delete "
-                                <b>{i.englishTitle}</b>
-                                "?
-                              </PopoverBody>
-                              <PopoverFooter p="3">
-                                <ButtonGroup
-                                  size="sm"
-                                  display="flex"
-                                  justifyContent="flex-end"
-                                >
-                                  <Button variant="outline" onClick={onClose}>
-                                    Cancel
-                                  </Button>
-                                  <Button
-                                    colorScheme="red"
-                                    onClick={() => {
-                                      deleteCourse(i._id, i.englishTitle);
-                                      onClose();
-                                    }}
-                                  >
-                                    <FaTrash />
-                                  </Button>
-                                </ButtonGroup>
-                              </PopoverFooter>
-                            </PopoverContent>
-                          </Portal>
-                        </>
-                      )}
-                    </Popover>
+                    <ButtonGroup>
+                      <Button
+                        flex="1"
+                        variant={newCourse.active ? "outline" : "outline"}
+                        colorScheme={newCourse.active ? "green" : "gray"}
+                        onClick={(e) =>
+                          setNewCourse({ ...newCourse, active: true })
+                        }
+                      >
+                        Active
+                      </Button>
+                      <Button
+                        flex="1"
+                        variant={!newCourse.active ? "outline" : "outline"}
+                        colorScheme={!newCourse.active ? "red" : "gray"}
+                        onClick={(e) =>
+                          setNewCourse({ ...newCourse, active: false })
+                        }
+                      >
+                        Inactive
+                      </Button>
+                    </ButtonGroup>
+                    <Button
+                      colorScheme="blue"
+                      type="submit"
+                      w="100%"
+                      pointerEvents={
+                        newCourse.englishTitle &&
+                        newCourse.englishLink &&
+                        newCourse.category &&
+                        newCourse.contentType
+                          ? ""
+                          : "none"
+                      }
+                      opacity={
+                        newCourse.englishTitle &&
+                        newCourse.englishLink &&
+                        newCourse.category &&
+                        newCourse.contentType
+                          ? "1"
+                          : "0.3"
+                      }
+                    >
+                      Update{" "}
+                      {newCourse.englishTitle && (
+                        <>"{newCourse.englishTitle}"</>
+                      )}{" "}
+                      Course
+                    </Button>
                   </Flex>
-                </Flex>
-              </motion.div>
+                </form>
+              </>
             ))
             .reverse()}
         </AnimatePresence>
