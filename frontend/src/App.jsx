@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { MdFileUpload } from "react-icons/md";
 import { FaTrash } from "react-icons/fa";
 import { FaFilePdf, FaFileVideo } from "react-icons/fa6";
+import { motion, AnimatePresence } from "motion/react";
 
 import {
   Input,
@@ -117,7 +118,7 @@ export default function App() {
 
       if (!res.ok) {
         toast({
-          title: "Erorr creating course.",
+          title: "Error creating course.",
           status: "error"
         });
       } else {
@@ -178,7 +179,7 @@ export default function App() {
 
       if (!res.ok) {
         toast({
-          title: "Erorr creating category.",
+          title: "Error creating category.",
           status: "error"
         });
       } else {
@@ -214,82 +215,47 @@ export default function App() {
   return (
     <main>
       <Flex flexDirection="column" gap="50" w="60%" justifyContent="center">
-        {showForm ? (
-          <form onSubmit={createCourse}>
-            <Flex flexDirection="column" gap="5">
-              <Input
-                placeholder="English Title"
-                name="englishTitle"
-                value={newCourse.englishTitle}
-                onChange={(e) => {
-                  setNewCourse({
-                    ...newCourse,
-                    englishTitle: e.target.value
-                  });
-                }}
-              />
-
-              <InputGroup size="md" gap="3">
-                <Input
-                  placeholder="English Link"
-                  name="englishLink"
-                  value={newCourse.englishLink}
-                  onChange={(e) => {
-                    setNewCourse({
-                      ...newCourse,
-                      englishLink: e.target.value
-                    });
-                  }}
-                  type="URL"
-                />
-
-                <UploadButton
-                  options={options}
-                  onComplete={(files) =>
-                    setNewCourse({
-                      ...newCourse,
-                      englishLink: files.map((x) => x.fileUrl).join("\n")
-                    })
-                  }
-                >
-                  {({ onClick }) => (
-                    <IconButton icon={<MdFileUpload />} onClick={onClick} />
-                  )}
-                </UploadButton>
-              </InputGroup>
-
-              {showSpanishCourse && (
-                <>
+        <AnimatePresence>
+          {showForm ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0 }}
+            >
+              <form onSubmit={createCourse}>
+                <Flex flexDirection="column" gap="5">
                   <Input
-                    placeholder="Spanish Title"
-                    name="spanishTitle"
-                    value={newCourse.spanishTitle}
+                    placeholder="English Title"
+                    name="englishTitle"
+                    value={newCourse.englishTitle}
                     onChange={(e) => {
                       setNewCourse({
                         ...newCourse,
-                        spanishTitle: e.target.value
+                        englishTitle: e.target.value
                       });
                     }}
                   />
+
                   <InputGroup size="md" gap="3">
                     <Input
-                      placeholder="Spanish Link"
-                      name="spanishLink"
-                      value={newCourse.spanishLink}
+                      placeholder="English Link"
+                      name="englishLink"
+                      value={newCourse.englishLink}
                       onChange={(e) => {
                         setNewCourse({
                           ...newCourse,
-                          spanishLink: e.target.value
+                          englishLink: e.target.value
                         });
                       }}
                       type="URL"
                     />
+
                     <UploadButton
                       options={options}
                       onComplete={(files) =>
                         setNewCourse({
                           ...newCourse,
-                          spanishLink: files.map((x) => x.fileUrl).join("\n")
+                          englishLink: files.map((x) => x.fileUrl).join("\n")
                         })
                       }
                     >
@@ -298,90 +264,159 @@ export default function App() {
                       )}
                     </UploadButton>
                   </InputGroup>
-                </>
-              )}
 
-              {!showSpanishCourse && (
-                <Button
-                  onClick={() => {
-                    setShowSpanishCourse(true);
-                  }}
-                >
-                  Add Spanish
-                </Button>
-              )}
+                  {showSpanishCourse && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                    >
+                      <Flex flexDirection="column" gap="5">
+                        <Input
+                          placeholder="Spanish Title"
+                          name="spanishTitle"
+                          value={newCourse.spanishTitle}
+                          onChange={(e) => {
+                            setNewCourse({
+                              ...newCourse,
+                              spanishTitle: e.target.value
+                            });
+                          }}
+                        />
+                        <InputGroup size="md" gap="3">
+                          <Input
+                            placeholder="Spanish Link"
+                            name="spanishLink"
+                            value={newCourse.spanishLink}
+                            onChange={(e) => {
+                              setNewCourse({
+                                ...newCourse,
+                                spanishLink: e.target.value
+                              });
+                            }}
+                            type="URL"
+                          />
+                          <UploadButton
+                            options={options}
+                            onComplete={(files) =>
+                              setNewCourse({
+                                ...newCourse,
+                                spanishLink: files
+                                  .map((x) => x.fileUrl)
+                                  .join("\n")
+                              })
+                            }
+                          >
+                            {({ onClick }) => (
+                              <IconButton
+                                icon={<MdFileUpload />}
+                                onClick={onClick}
+                              />
+                            )}
+                          </UploadButton>
+                        </InputGroup>
+                      </Flex>
+                    </motion.div>
+                  )}
 
-              <Select
-                placeholder="Choose a category"
-                name="category"
-                value={newCourse.category}
-                onChange={(e) => {
-                  setNewCourse({ ...newCourse, category: e.target.value });
-                }}
-              >
-                {allCategories?.data?.map((i) => (
-                  <option key={i._id}>{i.englishTitle}</option>
-                ))}
-              </Select>
-              <Select
-                placeholder="Choose content type"
-                name="contentType"
-                value={newCourse.contentType}
-                onChange={(e) => {
-                  setNewCourse({ ...newCourse, contentType: e.target.value });
-                }}
-              >
-                <option>Video</option>
-                <option>PDF</option>
-              </Select>
+                  {!showSpanishCourse && (
+                    <Button
+                      onClick={() => {
+                        setShowSpanishCourse(true);
+                      }}
+                    >
+                      Add Spanish
+                    </Button>
+                  )}
 
-              <ButtonGroup>
-                <Button
-                  flex="1"
-                  variant={newCourse.active ? "outline" : "outline"}
-                  colorScheme={newCourse.active ? "green" : "gray"}
-                  onClick={(e) => setNewCourse({ ...newCourse, active: true })}
-                >
-                  Active
-                </Button>
-                <Button
-                  flex="1"
-                  variant={!newCourse.active ? "outline" : "outline"}
-                  colorScheme={!newCourse.active ? "red" : "gray"}
-                  onClick={(e) => setNewCourse({ ...newCourse, active: false })}
-                >
-                  Inactive
-                </Button>
-              </ButtonGroup>
+                  <Select
+                    placeholder="Choose a category"
+                    name="category"
+                    value={newCourse.category}
+                    onChange={(e) => {
+                      setNewCourse({ ...newCourse, category: e.target.value });
+                    }}
+                  >
+                    {allCategories?.data?.map((i) => (
+                      <option key={i._id}>{i.englishTitle}</option>
+                    ))}
+                  </Select>
+                  <Select
+                    placeholder="Choose content type"
+                    name="contentType"
+                    value={newCourse.contentType}
+                    onChange={(e) => {
+                      setNewCourse({
+                        ...newCourse,
+                        contentType: e.target.value
+                      });
+                    }}
+                  >
+                    <option>Video</option>
+                    <option>PDF</option>
+                  </Select>
 
-              {newCourse.englishTitle &&
-              newCourse.englishLink &&
-              newCourse.category &&
-              newCourse.contentType ? (
-                <Button colorScheme="blue" type="submit">
-                  Create{" "}
-                  {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
-                  Course
-                </Button>
-              ) : (
-                <Button colorScheme="blue" type="submit" disabled>
-                  Create{" "}
-                  {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
-                  Course
-                </Button>
-              )}
-            </Flex>
-          </form>
-        ) : (
-          <Button
-            colorScheme="blue"
-            onClick={() => {
-              setShowForm(true);
-            }}
-          >
-            Add New Course
-          </Button>
-        )}
+                  <ButtonGroup>
+                    <Button
+                      flex="1"
+                      variant={newCourse.active ? "outline" : "outline"}
+                      colorScheme={newCourse.active ? "green" : "gray"}
+                      onClick={(e) =>
+                        setNewCourse({ ...newCourse, active: true })
+                      }
+                    >
+                      Active
+                    </Button>
+                    <Button
+                      flex="1"
+                      variant={!newCourse.active ? "outline" : "outline"}
+                      colorScheme={!newCourse.active ? "red" : "gray"}
+                      onClick={(e) =>
+                        setNewCourse({ ...newCourse, active: false })
+                      }
+                    >
+                      Inactive
+                    </Button>
+                  </ButtonGroup>
+                  <Button
+                    colorScheme="blue"
+                    type="submit"
+                    w="100%"
+                    pointerEvents={
+                      newCourse.englishTitle &&
+                      newCourse.englishLink &&
+                      newCourse.category &&
+                      newCourse.contentType
+                        ? ""
+                        : "none"
+                    }
+                    opacity={
+                      newCourse.englishTitle &&
+                      newCourse.englishLink &&
+                      newCourse.category &&
+                      newCourse.contentType
+                        ? "1"
+                        : "0.3"
+                    }
+                  >
+                    Create{" "}
+                    {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
+                    Course
+                  </Button>
+                </Flex>
+              </form>
+            </motion.div>
+          ) : (
+            <Button
+              colorScheme="blue"
+              onClick={() => {
+                setShowForm(true);
+              }}
+            >
+              Add New Course
+            </Button>
+          )}
+        </AnimatePresence>
         {/* <Box flexBasis="100%">
           <Spacer />
           <form onSubmit={createCategory}>
@@ -472,94 +507,103 @@ export default function App() {
       <br />
       <br />
       <Flex gap="5" w="60%" flexDirection="column">
-        {allCourses?.data?.map((i) => (
-          <>
-            <Flex
-              justifyContent="space-between"
-              alignItems="center"
-              flexDirection="row"
-              gap="3"
-              bg="#fff"
-              border="1px"
-              borderColor="#eee"
-              pb="3"
-              pt="3"
-              pl="6"
-              pr="6"
-              borderRadius="8"
-            >
-              <Flex flexDirection="row" alignItems="center" gap="5">
-                <div>
-                  {i.contentType === "PDF" ? (
-                    <FaFilePdf fontSize="30px" />
-                  ) : i.contentType === "Video" ? (
-                    <FaFileVideo fontSize="30px" />
-                  ) : (
-                    ""
-                  )}
-                </div>
-                <div>
-                  {i.englishTitle}
-                  <br />
-                  {i.category}
-                </div>
-              </Flex>
-
-              <Flex gap="3" flexWrap="wrap">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    getCourse(i._id);
-                  }}
+        <AnimatePresence>
+          {allCourses?.data
+            ?.map((i) => (
+              <motion.div
+                key={i._id}
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0 }}
+              >
+                <Flex
+                  justifyContent="space-between"
+                  alignItems="center"
+                  flexDirection="row"
+                  gap="3"
+                  bg="#fff"
+                  border="1px"
+                  borderColor="#eee"
+                  pb="3"
+                  pt="3"
+                  pl="6"
+                  pr="6"
+                  borderRadius="8"
                 >
-                  Edit
-                </Button>
-                <Popover>
-                  {({ onClose }) => (
-                    <>
-                      <PopoverTrigger>
-                        <Button colorScheme="red" size="sm">
-                          Delete
-                        </Button>
-                      </PopoverTrigger>
-                      <Portal>
-                        <PopoverContent>
-                          <PopoverArrow />
+                  <Flex flexDirection="row" alignItems="center" gap="5">
+                    <div>
+                      {i.contentType === "PDF" ? (
+                        <FaFilePdf fontSize="30px" />
+                      ) : i.contentType === "Video" ? (
+                        <FaFileVideo fontSize="30px" />
+                      ) : (
+                        ""
+                      )}
+                    </div>
+                    <div>
+                      {i.englishTitle}
+                      <br />
+                      {i.category}
+                    </div>
+                  </Flex>
 
-                          <PopoverBody pt="4" pb="4" pl="6" pr="6">
-                            Are you sure you want to delete "
-                            <b>{i.englishTitle}</b>
-                            "?
-                          </PopoverBody>
-                          <PopoverFooter p="3">
-                            <ButtonGroup
-                              size="sm"
-                              display="flex"
-                              justifyContent="flex-end"
-                            >
-                              <Button variant="outline" onClick={onClose}>
-                                Cancel
-                              </Button>
-                              <Button
-                                colorScheme="red"
-                                onClick={() => {
-                                  deleteCourse(i._id, i.englishTitle);
-                                  onClose();
-                                }}
-                              >
-                                <FaTrash />
-                              </Button>
-                            </ButtonGroup>
-                          </PopoverFooter>
-                        </PopoverContent>
-                      </Portal>
-                    </>
-                  )}
-                </Popover>
-              </Flex>
-            </Flex>
-          </>
-        ))}
+                  <Flex gap="3" flexWrap="wrap">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        getCourse(i._id);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                    <Popover>
+                      {({ onClose }) => (
+                        <>
+                          <PopoverTrigger>
+                            <Button colorScheme="red" size="sm">
+                              Delete
+                            </Button>
+                          </PopoverTrigger>
+                          <Portal>
+                            <PopoverContent>
+                              <PopoverArrow />
+
+                              <PopoverBody pt="4" pb="4" pl="6" pr="6">
+                                Are you sure you want to delete "
+                                <b>{i.englishTitle}</b>
+                                "?
+                              </PopoverBody>
+                              <PopoverFooter p="3">
+                                <ButtonGroup
+                                  size="sm"
+                                  display="flex"
+                                  justifyContent="flex-end"
+                                >
+                                  <Button variant="outline" onClick={onClose}>
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    colorScheme="red"
+                                    onClick={() => {
+                                      deleteCourse(i._id, i.englishTitle);
+                                      onClose();
+                                    }}
+                                  >
+                                    <FaTrash />
+                                  </Button>
+                                </ButtonGroup>
+                              </PopoverFooter>
+                            </PopoverContent>
+                          </Portal>
+                        </>
+                      )}
+                    </Popover>
+                  </Flex>
+                </Flex>
+              </motion.div>
+            ))
+            .reverse()}
+        </AnimatePresence>
       </Flex>
     </main>
   );

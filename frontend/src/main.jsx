@@ -10,7 +10,7 @@ createRoot(document.getElementById("root")).render(
       defaultOptions: {
         position: "bottom-right",
         containerStyle: {
-          padding: "15px"
+          padding: "0 15px 15px 0"
         }
       }
     }}
