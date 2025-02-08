@@ -5,7 +5,16 @@ import App from "./App.jsx";
 import "./index.scss";
 
 createRoot(document.getElementById("root")).render(
-  <ChakraProvider>
+  <ChakraProvider
+    toastOptions={{
+      defaultOptions: {
+        position: "bottom-right",
+        containerStyle: {
+          padding: "15px"
+        }
+      }
+    }}
+  >
     <App />
   </ChakraProvider>
 );

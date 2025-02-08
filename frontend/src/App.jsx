@@ -1,14 +1,34 @@
 import { useState, useEffect } from "react";
+import { MdFileUpload } from "react-icons/md";
+import { FaTrash } from "react-icons/fa";
+
 import {
   Input,
+  InputGroup,
+  InputRightElement,
+  InputRightAddon,
   Select,
+  IconButton,
   Radio,
   RadioGroup,
   Button,
+  ButtonGroup,
   Flex,
+  FormLabel,
+  Switch,
   Box,
   useToast,
-  Spacer
+  Spacer,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverHeader,
+  PopoverBody,
+  PopoverFooter,
+  PopoverArrow,
+  PopoverCloseButton,
+  Portal,
+  PopoverAnchor
 } from "@chakra-ui/react";
 import { UploadButton } from "@bytescale/upload-widget-react";
 
@@ -28,6 +48,31 @@ export default function App() {
     active: true
   });
 
+  const [state, setState] = useState(false);
+
+  const handleToggle = () => {
+    if (newCourse.active) {
+      setNewCourse({ ...newCourse, active: false });
+    } else {
+      setNewCourse({ ...newCourse, active: true });
+    }
+  };
+
+  const [showSpanishCourse, setShowSpanishCourse] = useState(false);
+
+  const clearCourseForm = () => {
+    setShowSpanishCourse(false);
+    setNewCourse({
+      englishTitle: "",
+      spanishTitle: "",
+      englishLink: "",
+      spanishLink: "",
+      category: "",
+      contentType: "",
+      active: true
+    });
+  };
+
   const [allCategories, setAllCategories] = useState([]);
 
   const [newCategory, setNewCategory] = useState({
@@ -36,9 +81,19 @@ export default function App() {
     categoryImage: ""
   });
 
-  const toast = useToast();
+  const [showSpanishCategory, setShowSpanishCategory] = useState(false);
 
-  const [deleteButton, setDeleteButton] = useState("none");
+  const clearCategoryForm = () => {
+    setShowSpanishCategory(false);
+
+    setNewCategory({
+      englishTitle: "",
+      spanishTitle: "",
+      categoryImage: ""
+    });
+  };
+
+  const toast = useToast();
 
   const getCourses = async () => {
     try {
@@ -88,15 +143,7 @@ export default function App() {
           title: `Course "${newCourse.englishTitle}" created.`,
           status: "success"
         });
-        setNewCourse({
-          englishTitle: "",
-          spanishTitle: "",
-          englishLink: "",
-          spanishLink: "",
-          category: "",
-          contentType: "",
-          active: true
-        });
+        clearCourseForm();
         setCourseStatus("true");
         getCourses();
       }
@@ -105,7 +152,7 @@ export default function App() {
     }
   };
 
-  const deleteCourse = async (id) => {
+  const deleteCourse = async (id, name) => {
     try {
       const res = await fetch(`/api/courses/${id}`, {
         method: "DELETE"
@@ -113,6 +160,10 @@ export default function App() {
 
       if (res.ok) {
         getCourses();
+        toast({
+          title: `Course "${name}" deleted.`,
+          status: "success"
+        });
       }
     } catch (error) {
       console.log(error);
@@ -154,11 +205,7 @@ export default function App() {
           title: `Category "${newCategory.englishTitle}" created.`,
           status: "success"
         });
-        setNewCategory({
-          englishTitle: "",
-          spanishTitle: "",
-          categoryImage: ""
-        });
+        clearCategoryForm();
         getCategories();
       }
     } catch (error) {
@@ -197,43 +244,86 @@ export default function App() {
                   setNewCourse({ ...newCourse, englishTitle: e.target.value });
                 }}
               />
-              <Input
-                placeholder="English Link"
-                name="englishLink"
-                value={newCourse.englishLink}
-                onChange={(e) => {
-                  setNewCourse({ ...newCourse, englishLink: e.target.value });
-                }}
-              />
-              <UploadButton
-                options={options}
-                onComplete={(files) =>
-                  setNewCourse({
-                    ...newCourse,
-                    englishLink: files.map((x) => x.fileUrl).join("\n")
-                  })
-                }
-              >
-                {({ onClick }) => (
-                  <Button onClick={onClick}>Upload a file...</Button>
-                )}
-              </UploadButton>
-              <Input
-                placeholder="Spanish Title"
-                name="spanishTitle"
-                value={newCourse.spanishTitle}
-                onChange={(e) => {
-                  setNewCourse({ ...newCourse, spanishTitle: e.target.value });
-                }}
-              />
-              <Input
-                placeholder="Spanish Link"
-                name="spanishLink"
-                value={newCourse.spanishLink}
-                onChange={(e) => {
-                  setNewCourse({ ...newCourse, spanishLink: e.target.value });
-                }}
-              />
+
+              <InputGroup size="md" gap="3">
+                <Input
+                  placeholder="English Link"
+                  name="englishLink"
+                  value={newCourse.englishLink}
+                  onChange={(e) => {
+                    setNewCourse({ ...newCourse, englishLink: e.target.value });
+                  }}
+                  type="URL"
+                />
+
+                <UploadButton
+                  options={options}
+                  onComplete={(files) =>
+                    setNewCourse({
+                      ...newCourse,
+                      englishLink: files.map((x) => x.fileUrl).join("\n")
+                    })
+                  }
+                >
+                  {({ onClick }) => (
+                    <IconButton icon={<MdFileUpload />} onClick={onClick} />
+                  )}
+                </UploadButton>
+              </InputGroup>
+
+              {showSpanishCourse && (
+                <>
+                  <Input
+                    placeholder="Spanish Title"
+                    name="spanishTitle"
+                    value={newCourse.spanishTitle}
+                    onChange={(e) => {
+                      setNewCourse({
+                        ...newCourse,
+                        spanishTitle: e.target.value
+                      });
+                    }}
+                  />
+                  <InputGroup size="md" gap="3">
+                    <Input
+                      placeholder="Spanish Link"
+                      name="spanishLink"
+                      value={newCourse.spanishLink}
+                      onChange={(e) => {
+                        setNewCourse({
+                          ...newCourse,
+                          spanishLink: e.target.value
+                        });
+                      }}
+                      type="URL"
+                    />
+                    <UploadButton
+                      options={options}
+                      onComplete={(files) =>
+                        setNewCourse({
+                          ...newCourse,
+                          spanishLink: files.map((x) => x.fileUrl).join("\n")
+                        })
+                      }
+                    >
+                      {({ onClick }) => (
+                        <IconButton icon={<MdFileUpload />} onClick={onClick} />
+                      )}
+                    </UploadButton>
+                  </InputGroup>
+                </>
+              )}
+
+              {!showSpanishCourse && (
+                <Button
+                  onClick={() => {
+                    setShowSpanishCourse(true);
+                  }}
+                >
+                  Add Spanish
+                </Button>
+              )}
+
               <Select
                 placeholder="Choose a category"
                 name="category"
@@ -257,41 +347,40 @@ export default function App() {
                 <option>Video</option>
                 <option>PDF</option>
               </Select>
-              <RadioGroup onChange={setCourseStatus} value={courseStatus}>
-                <Flex gap="10">
-                  <Radio
-                    name="active"
-                    value="true"
-                    onChange={(e) =>
-                      setNewCourse({ ...newCourse, active: e.target.value })
-                    }
-                  >
-                    Active
-                  </Radio>
 
-                  <Radio
-                    name="active"
-                    onChange={(e) =>
-                      setNewCourse({ ...newCourse, active: e.target.value })
-                    }
-                    value="false"
-                  >
-                    Inactive
-                  </Radio>
-                </Flex>
-              </RadioGroup>
+              <ButtonGroup>
+                <Button
+                  flex="1"
+                  variant={newCourse.active ? "solid" : "outline"}
+                  colorScheme={newCourse.active ? "green" : "gray"}
+                  onClick={(e) => setNewCourse({ ...newCourse, active: true })}
+                >
+                  Active
+                </Button>
+                <Button
+                  flex="1"
+                  variant={!newCourse.active ? "solid" : "outline"}
+                  colorScheme={!newCourse.active ? "red" : "gray"}
+                  onClick={(e) => setNewCourse({ ...newCourse, active: false })}
+                >
+                  Inactive
+                </Button>
+              </ButtonGroup>
 
               {newCourse.englishTitle &&
               newCourse.englishLink &&
               newCourse.category &&
-              newCourse.contentType &&
-              newCourse.active ? (
+              newCourse.contentType ? (
                 <Button colorScheme="blue" type="submit">
-                  Create Course
+                  Create{" "}
+                  {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
+                  Course
                 </Button>
               ) : (
                 <Button colorScheme="blue" type="submit" disabled>
-                  Create Course
+                  Create{" "}
+                  {newCourse.englishTitle && <>"{newCourse.englishTitle}"</>}{" "}
+                  Course
                 </Button>
               )}
             </Flex>
@@ -313,49 +402,70 @@ export default function App() {
                 }}
               />
 
-              <Input
-                placeholder="Spanish Title"
-                name="spanishTitle"
-                value={newCategory.spanishTitle}
-                onChange={(e) => {
-                  setNewCategory({
-                    ...newCategory,
-                    spanishTitle: e.target.value
-                  });
-                }}
-              />
-              <Input
-                placeholder="Category Image"
-                name="categoryImage"
-                value={newCategory.categoryImage}
-                onChange={(e) => {
-                  setNewCategory({
-                    ...newCategory,
-                    categoryImage: e.target.value
-                  });
-                }}
-              />
-              <UploadButton
-                options={options}
-                onComplete={(files) =>
-                  setNewCategory({
-                    ...newCourse,
-                    categoryImage: files.map((x) => x.fileUrl).join("\n")
-                  })
-                }
-              >
-                {({ onClick }) => (
-                  <Button onClick={onClick}>Upload a file...</Button>
-                )}
-              </UploadButton>
+              {showSpanishCategory && (
+                <Input
+                  placeholder="Spanish Title"
+                  name="spanishTitle"
+                  value={newCategory.spanishTitle}
+                  onChange={(e) => {
+                    setNewCategory({
+                      ...newCategory,
+                      spanishTitle: e.target.value
+                    });
+                  }}
+                />
+              )}
+
+              {!showSpanishCategory && (
+                <Button
+                  onClick={() => {
+                    setShowSpanishCategory(true);
+                  }}
+                >
+                  Add Spanish
+                </Button>
+              )}
+
+              <InputGroup size="md" gap="3">
+                <Input
+                  placeholder="Category Image"
+                  name="categoryImage"
+                  value={newCategory.categoryImage}
+                  onChange={(e) => {
+                    setNewCourse({ ...newCourse, spanishLink: e.target.value });
+                  }}
+                  type="URL"
+                />
+                <UploadButton
+                  options={options}
+                  onComplete={(files) =>
+                    setNewCategory({
+                      ...newCategory,
+                      categoryImage: files.map((x) => x.fileUrl).join("\n")
+                    })
+                  }
+                >
+                  {({ onClick }) => (
+                    <IconButton icon={<MdFileUpload />} onClick={onClick} />
+                  )}
+                </UploadButton>
+              </InputGroup>
 
               {newCategory.englishTitle && newCategory.categoryImage ? (
                 <Button colorScheme="blue" type="submit">
-                  Create Category
+                  Create{" "}
+                  {newCategory.englishTitle && (
+                    <>"{newCategory.englishTitle}"</>
+                  )}{" "}
+                  Category
                 </Button>
               ) : (
                 <Button colorScheme="blue" type="submit" disabled>
-                  Create Category
+                  Create{" "}
+                  {newCategory.englishTitle && (
+                    <>"{newCategory.englishTitle}"</>
+                  )}{" "}
+                  Category
                 </Button>
               )}
             </Flex>
@@ -367,46 +477,48 @@ export default function App() {
       <Flex gap="5" flexDirection="column" alignItems="center">
         {allCourses?.data?.map((i) => (
           <Flex gap="5" alignItems="center">
-            {i.englishTitle}
+            {i.englishTitle} <b>{i.contentType}</b>
+            <Popover>
+              {({ onClose }) => (
+                <>
+                  <PopoverTrigger>
+                    <Button colorScheme="red" size="sm">
+                      Delete
+                    </Button>
+                  </PopoverTrigger>
+                  <Portal>
+                    <PopoverContent>
+                      <PopoverArrow />
 
-            {deleteButton !== i._id ? (
-              <Button
-                colorScheme="red"
-                aria-label="Delete Course"
-                onClick={() => {
-                  setDeleteButton(i._id);
-                }}
-              >
-                Delete
-              </Button>
-            ) : deleteButton === i._id ? (
-              <>
-                <Button
-                  colorScheme="red"
-                  onClick={() => {
-                    deleteCourse(i._id);
-                    toast({
-                      title: `Course "${i.englishTitle}" deleted.`,
-                      status: "success"
-                    });
-                  }}
-                >
-                  Are you sure?
-                </Button>
-
-                <Button
-                  variant="outline"
-                  colorScheme="red"
-                  onClick={() => {
-                    setDeleteButton("");
-                  }}
-                >
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              ""
-            )}
+                      <PopoverBody pt="4" pb="4" pl="6" pr="6">
+                        Are you sure you want to delete "<b>{i.englishTitle}</b>
+                        "?
+                      </PopoverBody>
+                      <PopoverFooter p="3">
+                        <ButtonGroup
+                          size="sm"
+                          display="flex"
+                          justifyContent="flex-end"
+                        >
+                          <Button variant="outline" onClick={onClose}>
+                            Cancel
+                          </Button>
+                          <Button
+                            colorScheme="red"
+                            onClick={() => {
+                              deleteCourse(i._id, i.englishTitle);
+                              onClose();
+                            }}
+                          >
+                            <FaTrash />
+                          </Button>
+                        </ButtonGroup>
+                      </PopoverFooter>
+                    </PopoverContent>
+                  </Portal>
+                </>
+              )}
+            </Popover>
           </Flex>
         ))}
       </Flex>
