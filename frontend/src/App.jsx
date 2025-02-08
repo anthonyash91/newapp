@@ -1,43 +1,35 @@
 import { useState, useEffect } from "react";
 import { MdFileUpload } from "react-icons/md";
 import { FaTrash } from "react-icons/fa";
+import { FaFilePdf, FaFileVideo } from "react-icons/fa6";
 
 import {
   Input,
   InputGroup,
-  InputRightElement,
-  InputRightAddon,
   Select,
   IconButton,
-  Radio,
-  RadioGroup,
   Button,
   ButtonGroup,
   Flex,
-  FormLabel,
-  Switch,
   Box,
   useToast,
   Spacer,
   Popover,
   PopoverTrigger,
   PopoverContent,
-  PopoverHeader,
   PopoverBody,
   PopoverFooter,
   PopoverArrow,
-  PopoverCloseButton,
-  Portal,
-  PopoverAnchor
+  Portal
 } from "@chakra-ui/react";
+
 import { UploadButton } from "@bytescale/upload-widget-react";
 
 export default function App() {
   const [allCourses, setAllCourses] = useState([]);
   const [singleCourse, setSingleCourse] = useState([]);
 
-  const [courseStatus, setCourseStatus] = useState("true");
-
+  const [showForm, setShowForm] = useState(false);
   const [newCourse, setNewCourse] = useState({
     englishTitle: "",
     spanishTitle: "",
@@ -47,16 +39,6 @@ export default function App() {
     contentType: "",
     active: true
   });
-
-  const [state, setState] = useState(false);
-
-  const handleToggle = () => {
-    if (newCourse.active) {
-      setNewCourse({ ...newCourse, active: false });
-    } else {
-      setNewCourse({ ...newCourse, active: true });
-    }
-  };
 
   const [showSpanishCourse, setShowSpanishCourse] = useState(false);
 
@@ -144,7 +126,6 @@ export default function App() {
           status: "success"
         });
         clearCourseForm();
-        setCourseStatus("true");
         getCourses();
       }
     } catch (error) {
@@ -232,8 +213,8 @@ export default function App() {
 
   return (
     <main>
-      <Flex flexDirection="row" gap="50" w="90%">
-        <Box flexBasis="100%">
+      <Flex flexDirection="column" gap="50" w="60%" justifyContent="center">
+        {showForm ? (
           <form onSubmit={createCourse}>
             <Flex flexDirection="column" gap="5">
               <Input
@@ -241,7 +222,10 @@ export default function App() {
                 name="englishTitle"
                 value={newCourse.englishTitle}
                 onChange={(e) => {
-                  setNewCourse({ ...newCourse, englishTitle: e.target.value });
+                  setNewCourse({
+                    ...newCourse,
+                    englishTitle: e.target.value
+                  });
                 }}
               />
 
@@ -251,7 +235,10 @@ export default function App() {
                   name="englishLink"
                   value={newCourse.englishLink}
                   onChange={(e) => {
-                    setNewCourse({ ...newCourse, englishLink: e.target.value });
+                    setNewCourse({
+                      ...newCourse,
+                      englishLink: e.target.value
+                    });
                   }}
                   type="URL"
                 />
@@ -351,7 +338,7 @@ export default function App() {
               <ButtonGroup>
                 <Button
                   flex="1"
-                  variant={newCourse.active ? "solid" : "outline"}
+                  variant={newCourse.active ? "outline" : "outline"}
                   colorScheme={newCourse.active ? "green" : "gray"}
                   onClick={(e) => setNewCourse({ ...newCourse, active: true })}
                 >
@@ -359,7 +346,7 @@ export default function App() {
                 </Button>
                 <Button
                   flex="1"
-                  variant={!newCourse.active ? "solid" : "outline"}
+                  variant={!newCourse.active ? "outline" : "outline"}
                   colorScheme={!newCourse.active ? "red" : "gray"}
                   onClick={(e) => setNewCourse({ ...newCourse, active: false })}
                 >
@@ -385,8 +372,17 @@ export default function App() {
               )}
             </Flex>
           </form>
-        </Box>
-        <Box flexBasis="100%">
+        ) : (
+          <Button
+            colorScheme="blue"
+            onClick={() => {
+              setShowForm(true);
+            }}
+          >
+            Add New Course
+          </Button>
+        )}
+        {/* <Box flexBasis="100%">
           <Spacer />
           <form onSubmit={createCategory}>
             <Flex flexDirection="column" gap="5" w="100%">
@@ -470,56 +466,99 @@ export default function App() {
               )}
             </Flex>
           </form>
-        </Box>
+        </Box> */}
       </Flex>
-      <br />
-      <br />
-      <Flex gap="5" flexDirection="column" alignItems="center">
-        {allCourses?.data?.map((i) => (
-          <Flex gap="5" alignItems="center">
-            {i.englishTitle} <b>{i.contentType}</b>
-            <Popover>
-              {({ onClose }) => (
-                <>
-                  <PopoverTrigger>
-                    <Button colorScheme="red" size="sm">
-                      Delete
-                    </Button>
-                  </PopoverTrigger>
-                  <Portal>
-                    <PopoverContent>
-                      <PopoverArrow />
 
-                      <PopoverBody pt="4" pb="4" pl="6" pr="6">
-                        Are you sure you want to delete "<b>{i.englishTitle}</b>
-                        "?
-                      </PopoverBody>
-                      <PopoverFooter p="3">
-                        <ButtonGroup
-                          size="sm"
-                          display="flex"
-                          justifyContent="flex-end"
-                        >
-                          <Button variant="outline" onClick={onClose}>
-                            Cancel
-                          </Button>
-                          <Button
-                            colorScheme="red"
-                            onClick={() => {
-                              deleteCourse(i._id, i.englishTitle);
-                              onClose();
-                            }}
-                          >
-                            <FaTrash />
-                          </Button>
-                        </ButtonGroup>
-                      </PopoverFooter>
-                    </PopoverContent>
-                  </Portal>
-                </>
-              )}
-            </Popover>
-          </Flex>
+      <br />
+      <br />
+      <Flex gap="5" w="60%" flexDirection="column">
+        {allCourses?.data?.map((i) => (
+          <>
+            <Flex
+              justifyContent="space-between"
+              alignItems="center"
+              flexDirection="row"
+              gap="3"
+              bg="#fff"
+              border="1px"
+              borderColor="#eee"
+              pb="3"
+              pt="3"
+              pl="6"
+              pr="6"
+              borderRadius="8"
+            >
+              <Flex flexDirection="row" alignItems="center" gap="5">
+                <div>
+                  {i.contentType === "PDF" ? (
+                    <FaFilePdf fontSize="30px" />
+                  ) : i.contentType === "Video" ? (
+                    <FaFileVideo fontSize="30px" />
+                  ) : (
+                    ""
+                  )}
+                </div>
+                <div>
+                  {i.englishTitle}
+                  <br />
+                  {i.category}
+                </div>
+              </Flex>
+
+              <Flex gap="3" flexWrap="wrap">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    getCourse(i._id);
+                  }}
+                >
+                  Edit
+                </Button>
+                <Popover>
+                  {({ onClose }) => (
+                    <>
+                      <PopoverTrigger>
+                        <Button colorScheme="red" size="sm">
+                          Delete
+                        </Button>
+                      </PopoverTrigger>
+                      <Portal>
+                        <PopoverContent>
+                          <PopoverArrow />
+
+                          <PopoverBody pt="4" pb="4" pl="6" pr="6">
+                            Are you sure you want to delete "
+                            <b>{i.englishTitle}</b>
+                            "?
+                          </PopoverBody>
+                          <PopoverFooter p="3">
+                            <ButtonGroup
+                              size="sm"
+                              display="flex"
+                              justifyContent="flex-end"
+                            >
+                              <Button variant="outline" onClick={onClose}>
+                                Cancel
+                              </Button>
+                              <Button
+                                colorScheme="red"
+                                onClick={() => {
+                                  deleteCourse(i._id, i.englishTitle);
+                                  onClose();
+                                }}
+                              >
+                                <FaTrash />
+                              </Button>
+                            </ButtonGroup>
+                          </PopoverFooter>
+                        </PopoverContent>
+                      </Portal>
+                    </>
+                  )}
+                </Popover>
+              </Flex>
+            </Flex>
+          </>
         ))}
       </Flex>
     </main>
